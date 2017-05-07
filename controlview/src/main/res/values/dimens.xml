@@ -1,0 +1,3 @@
+<resources>
+    <dimen name="control_option_textview_padding">16dp</dimen>
+</resources>

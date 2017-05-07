@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="ControlView">
+        <attr name="selectedTextColor" format="color"/>
+        <attr name="unselectedTextColor" format="color"/>
+        <attr name="baseColor" format="color"/>
+        <attr name="accentColor" format="color"/>
+    </declare-styleable>
+</resources>
