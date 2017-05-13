@@ -13,11 +13,9 @@
 
     <com.controlview.shalskar.controlview.ControlView
         android:id="@+id/controlview1"
+        style="@style/ControlView.Flat"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        controlView:selectedTextColor="@color/selectedTextColour"
-        controlView:unselectedTextColor="@color/unselectedTextColour"
-        />
+        android:layout_height="wrap_content"/>
 
     <com.controlview.shalskar.controlview.ControlView
         android:id="@+id/controlview2"
@@ -25,7 +23,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         controlView:selectedTextColor="@color/selectedTextColour"
-        controlView:unselectedTextColor="@color/unselectedTextColour"
-        />
+        controlView:unselectedTextColor="@color/unselectedTextColour"/>
 
 </RelativeLayout>

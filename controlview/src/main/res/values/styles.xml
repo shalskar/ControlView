@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--Default stye-->
+    <style name="ControlView">
+        <item name="baseColor">@android:color/white</item>
+        <item name="accentColor">?colorAccent</item>
+        <item name="isRaised">true</item>
+        <item name="hasBorder">false</item>
+        <item name="selectedTextColor">@android:color/white</item>
+        <item name="unselectedTextColor">?colorAccent</item>
+    </style>
+
+    <!--Flat button style-->
+    <style name="ControlView.Flat" parent="ControlView">
+        <item name="isRaised">false</item>
+    </style>
+
+    <!--Flat with border-->
+    <style name="ControlView.Flat.Border" parent="ControlView.Flat">
+        <item name="hasBorder">true</item>
+    </style>
+
+</resources>

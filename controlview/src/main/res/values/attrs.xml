@@ -5,5 +5,7 @@
         <attr name="unselectedTextColor" format="color"/>
         <attr name="baseColor" format="color"/>
         <attr name="accentColor" format="color"/>
+        <attr name="isRaised" format="boolean"/>
+        <attr name="hasBorder" format="boolean"/>
     </declare-styleable>
 </resources>

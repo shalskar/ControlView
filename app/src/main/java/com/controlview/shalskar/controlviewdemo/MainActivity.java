@@ -22,7 +22,7 @@ public class MainActivity extends AppCompatActivity {
         this.controlView1 = (ControlView) findViewById(R.id.controlview1);
         this.controlView1.setBaseColour(android.R.color.white);
         this.controlView1.setAccentColour(R.color.colorAccent);
-        this.controlView1.setControlOptions(Arrays.asList("Auction", "Classified"));
+        this.controlView1.setControlOptions(Arrays.asList("Auction", "Classified", "Other"));
         this.controlView1.setOnControlOptionSelectedListener(new ControlView.OnControlOptionSelectedListener() {
             @Override
             public void onControlOptionSelected(int position, @NonNull String controlOption) {

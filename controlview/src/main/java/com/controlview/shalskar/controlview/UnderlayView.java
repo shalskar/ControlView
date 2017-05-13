@@ -69,17 +69,20 @@ public class UnderlayView extends View {
         if (this.sectionWidths.length > 0) {
             int leftPosition = 0;
             for (int i = 0; i < this.sectionWidths.length; i++) {
-                int sectionWidth = this.sectionWidths[i];
-                Rect rect = new Rect(leftPosition, 0, leftPosition + sectionWidth, getHeight());
-                leftPosition += sectionWidth;
-
-                if (i == this.currentPosition)
-                    canvas.drawRect(rect, this.accentPaint);
-                else
-                    canvas.drawRect(rect, this.basePaint);
-
+                drawSection(canvas, leftPosition, i);
+                leftPosition += this.sectionWidths[i];
             }
         }
+    }
+
+    private void drawSection(@NonNull Canvas canvas, int leftPosition, int position) {
+        int sectionWidth = this.sectionWidths[position];
+        Rect rect = new Rect(leftPosition, 0, leftPosition + sectionWidth, getHeight());
+
+        if (position == this.currentPosition)
+            canvas.drawRect(rect, this.accentPaint);
+        else
+            canvas.drawRect(rect, this.basePaint);
     }
 
     private void drawOutline(@NonNull Canvas canvas) {

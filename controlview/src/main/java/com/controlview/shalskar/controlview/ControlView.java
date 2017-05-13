@@ -40,13 +40,9 @@ public class ControlView extends CardView {
      * Attributes
      **/
 
-    private enum Type {
-        FLAT,
-        FLAT_BORDER,
-        RAISED
-    }
+    private boolean hasBorder;
 
-    private Type type = Type.RAISED;
+    private boolean isRaised;
 
     private int controlOptionTextViewPadding;
 
@@ -99,22 +95,21 @@ public class ControlView extends CardView {
     }
 
     private void resolveAttributes(@NonNull AttributeSet attributesSet) {
-        // todo check default styled res
-        TypedArray typedArray = getContext().obtainStyledAttributes(attributesSet, R.styleable.ControlView, 0, 0);
+        TypedArray typedArray = getContext().obtainStyledAttributes(attributesSet, R.styleable.ControlView, 0, R.style.ControlView);
         try {
             this.selectedTextColour = typedArray.getColor(R.styleable.ControlView_selectedTextColor, getResources().getColor(android.R.color.white));
-            this.unselectedTextColour = typedArray.getColor(R.styleable.ControlView_unselectedTextColor, getResources().getColor(android.R.color.white));
+            this.unselectedTextColour = typedArray.getColor(R.styleable.ControlView_unselectedTextColor, getResources().getColor(android.R.color.black));
             this.baseColour = typedArray.getColor(R.styleable.ControlView_baseColor, getResources().getColor(android.R.color.white));
-            this.accentColour = typedArray.getColor(R.styleable.ControlView_accentColor, getResources().getColor(android.R.color.white));
-            // todo resolve type from resources
-            this.type = Type.FLAT_BORDER;
+            this.accentColour = typedArray.getColor(R.styleable.ControlView_accentColor, getResources().getColor(android.R.color.black));
+            this.isRaised = typedArray.getBoolean(R.styleable.ControlView_isRaised, false);
+            this.hasBorder = typedArray.getBoolean(R.styleable.ControlView_hasBorder, false);
         } finally {
             typedArray.recycle();
         }
     }
 
     private void initialise() {
-        float elevation = this.type == Type.RAISED ? BASE_ELEVATION : 0;
+        float elevation = this.isRaised ? BASE_ELEVATION : 0;
         setCardElevation(elevation);
     }
 
@@ -128,11 +123,10 @@ public class ControlView extends CardView {
     private void initialiseViews() {
         this.controlOptionsLinearLayout = (LinearLayout) findViewById(R.id.control_options_linearlayout);
 
-        boolean shouldDrawOutline = this.type == Type.FLAT_BORDER;
         this.foregroundView = (UnderlayView) findViewById(R.id.foreground_underlayview);
         this.backgroundView = (UnderlayView) findViewById(R.id.background_underlayview);
-        this.foregroundView.setDrawOutline(shouldDrawOutline);
-        this.backgroundView.setDrawOutline(shouldDrawOutline);
+        this.foregroundView.setDrawOutline(this.hasBorder);
+        this.backgroundView.setDrawOutline(this.hasBorder);
     }
 
     private void initialiseDimensions() {
@@ -201,10 +195,10 @@ public class ControlView extends CardView {
                 animateToPosition(event, this.selectedControlOptionPosition);
                 updateTextViewColours();
 
-                if (this.onControlOptionSelectedListener != null) {
+                if (this.onControlOptionSelectedListener != null)
                     this.onControlOptionSelectedListener.onControlOptionSelected(this.selectedControlOptionPosition,
                             this.controlOptions.get(selectedControlOptionPosition));
-                }
+
                 if (shouldAnimateElevation())
                     animateElevationDown();
                 break;
@@ -213,25 +207,33 @@ public class ControlView extends CardView {
     }
 
     private boolean shouldAnimateElevation() {
-        return isLollipop() && this.type == Type.RAISED;
+        return isLollipop() && this.isRaised;
     }
 
     private void animateToPosition(@NonNull MotionEvent motionEvent, int position) {
         this.backgroundView.setCurrentPosition(this.foregroundView.getCurrentPosition());
         this.foregroundView.setCurrentPosition(position);
 
-        if (isLollipop()) {
-            int circularRevealEndRadius = Math.max(getWidth(), getHeight());
-            ViewAnimationUtils.createCircularReveal(this.foregroundView,
-                    (int) motionEvent.getX(),
-                    (int) motionEvent.getY(),
-                    0,
-                    circularRevealEndRadius)
-                    .start();
-        } else {
-            this.foregroundView.setAlpha(0);
-            this.foregroundView.animate().alpha(1).start();
-        }
+        if (isLollipop())
+            circularRevealForegroundView((int) motionEvent.getX(), (int) motionEvent.getY());
+        else
+            fadeInForegroundView();
+
+
+        this.backgroundView.setAlpha(1);
+        this.backgroundView.animate().alpha(0).start();
+    }
+
+    private void circularRevealForegroundView(int x, int y) {
+        int circularRevealEndRadius = Math.max(getWidth(), getHeight());
+        ViewAnimationUtils.createCircularReveal(this.foregroundView, x, y, 0, circularRevealEndRadius).start();
+    }
+
+    private void fadeInForegroundView() {
+        this.foregroundView.setAlpha(0);
+        this.foregroundView.animate()
+                .alpha(1)
+                .start();
     }
 
     private void updateTextViewColours() {
