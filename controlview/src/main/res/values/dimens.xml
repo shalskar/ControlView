@@ -1,3 +1,7 @@
 <resources>
+
     <dimen name="control_option_textview_padding">16dp</dimen>
+
+    <dimen name="underlayview_stroke_width">2dp</dimen>
+
 </resources>

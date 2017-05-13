@@ -21,7 +21,8 @@ import java.util.List;
 
 public class ControlView extends CardView {
 
-    private static final float SELECTED_ELEVATION_OFFSET = 6;
+    private static final float BASE_ELEVATION = 2;
+    private static final float RAISED_ELEVATION = 8;
 
     /**
      * Views
@@ -39,6 +40,14 @@ public class ControlView extends CardView {
      * Attributes
      **/
 
+    private enum Type {
+        FLAT,
+        FLAT_BORDER,
+        RAISED
+    }
+
+    private Type type = Type.RAISED;
+
     private int controlOptionTextViewPadding;
 
     private int selectedTextColour;
@@ -48,8 +57,6 @@ public class ControlView extends CardView {
     private int baseColour;
 
     private int accentColour;
-
-    private float elevation;
 
     /**
      * State
@@ -69,22 +76,24 @@ public class ControlView extends CardView {
 
     public ControlView(@NonNull Context context) {
         super(context);
-        initialise(context);
+        inflate(context);
     }
 
     public ControlView(@NonNull Context context, AttributeSet attrs) {
         super(context, attrs);
-        initialise(context);
+        inflate(context);
         resolveAttributes(attrs);
+        initialise();
     }
 
     public ControlView(@NonNull Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        initialise(context);
+        inflate(context);
         resolveAttributes(attrs);
+        initialise();
     }
 
-    private void initialise(@NonNull Context context) {
+    private void inflate(@NonNull Context context) {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(R.layout.controlview, this);
     }
@@ -97,10 +106,16 @@ public class ControlView extends CardView {
             this.unselectedTextColour = typedArray.getColor(R.styleable.ControlView_unselectedTextColor, getResources().getColor(android.R.color.white));
             this.baseColour = typedArray.getColor(R.styleable.ControlView_baseColor, getResources().getColor(android.R.color.white));
             this.accentColour = typedArray.getColor(R.styleable.ControlView_accentColor, getResources().getColor(android.R.color.white));
-            this.elevation = typedArray.getDimension(R.styleable.CardView_cardElevation, getResources().getDimension(R.dimen.cardview_default_elevation));
+            // todo resolve type from resources
+            this.type = Type.FLAT_BORDER;
         } finally {
             typedArray.recycle();
         }
+    }
+
+    private void initialise() {
+        float elevation = this.type == Type.RAISED ? BASE_ELEVATION : 0;
+        setCardElevation(elevation);
     }
 
     @Override
@@ -112,8 +127,12 @@ public class ControlView extends CardView {
 
     private void initialiseViews() {
         this.controlOptionsLinearLayout = (LinearLayout) findViewById(R.id.control_options_linearlayout);
+
+        boolean shouldDrawOutline = this.type == Type.FLAT_BORDER;
         this.foregroundView = (UnderlayView) findViewById(R.id.foreground_underlayview);
         this.backgroundView = (UnderlayView) findViewById(R.id.background_underlayview);
+        this.foregroundView.setDrawOutline(shouldDrawOutline);
+        this.backgroundView.setDrawOutline(shouldDrawOutline);
     }
 
     private void initialiseDimensions() {
@@ -139,7 +158,7 @@ public class ControlView extends CardView {
             @Override
             public void onGlobalLayout() {
                 updateDimensions();
-                controlOptionsLinearLayout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                ViewUtil.removeOnGlobalLayoutListener(controlOptionsLinearLayout, this);
             }
         });
     }
@@ -170,11 +189,11 @@ public class ControlView extends CardView {
     public boolean dispatchTouchEvent(@NonNull MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                if (isLollipop())
+                if (shouldAnimateElevation())
                     animateElevationUp();
                 break;
             case MotionEvent.ACTION_CANCEL:
-                if (isLollipop())
+                if (shouldAnimateElevation())
                     animateElevationDown();
                 break;
             case MotionEvent.ACTION_UP:
@@ -186,11 +205,15 @@ public class ControlView extends CardView {
                     this.onControlOptionSelectedListener.onControlOptionSelected(this.selectedControlOptionPosition,
                             this.controlOptions.get(selectedControlOptionPosition));
                 }
-                if (isLollipop())
+                if (shouldAnimateElevation())
                     animateElevationDown();
                 break;
         }
         return super.dispatchTouchEvent(event);
+    }
+
+    private boolean shouldAnimateElevation() {
+        return isLollipop() && this.type == Type.RAISED;
     }
 
     private void animateToPosition(@NonNull MotionEvent motionEvent, int position) {
@@ -225,14 +248,14 @@ public class ControlView extends CardView {
 
     private void animateElevationUp() {
         animate()
-                .z(this.elevation + SELECTED_ELEVATION_OFFSET)
+                .z(RAISED_ELEVATION)
                 .setInterpolator(new DecelerateInterpolator())
                 .start();
     }
 
     private void animateElevationDown() {
         animate()
-                .z(this.elevation)
+                .z(BASE_ELEVATION)
                 .setInterpolator(new DecelerateInterpolator())
                 .start();
     }

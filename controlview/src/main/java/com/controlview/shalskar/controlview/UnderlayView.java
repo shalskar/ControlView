@@ -16,7 +16,12 @@ public class UnderlayView extends View {
     private int currentPosition = 0;
 
     private int baseColour;
+
     private int accentColour;
+
+    private float outlineStrokeWidth;
+
+    private boolean drawOutline;
 
     @NonNull
     private Paint basePaint;
@@ -44,6 +49,7 @@ public class UnderlayView extends View {
     private void initialise() {
         this.baseColour = getResources().getColor(android.R.color.white);
         this.accentColour = getResources().getColor(android.R.color.darker_gray);
+        this.outlineStrokeWidth = getResources().getDimension(R.dimen.underlayview_stroke_width);
 
         this.basePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         this.accentPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -55,6 +61,11 @@ public class UnderlayView extends View {
     protected void onDraw(@NonNull Canvas canvas) {
         super.onDraw(canvas);
 
+        drawSections(canvas);
+        if (this.drawOutline) drawOutline(canvas);
+    }
+
+    private void drawSections(@NonNull Canvas canvas) {
         if (this.sectionWidths.length > 0) {
             int leftPosition = 0;
             for (int i = 0; i < this.sectionWidths.length; i++) {
@@ -69,6 +80,13 @@ public class UnderlayView extends View {
 
             }
         }
+    }
+
+    private void drawOutline(@NonNull Canvas canvas) {
+        this.accentPaint.setStyle(Paint.Style.STROKE);
+        this.accentPaint.setStrokeWidth(this.outlineStrokeWidth);
+        canvas.drawRect(0, 0, getWidth(), getHeight(), this.accentPaint);
+        this.accentPaint.setStyle(Paint.Style.FILL);
     }
 
     public void setBaseColour(int baseColour) {
@@ -91,6 +109,10 @@ public class UnderlayView extends View {
     public void setCurrentPosition(int currentPosition) {
         this.currentPosition = currentPosition;
         invalidate();
+    }
+
+    public void setDrawOutline(boolean drawOutline) {
+        this.drawOutline = drawOutline;
     }
 
     public int getCurrentPosition() {
