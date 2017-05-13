@@ -210,11 +210,11 @@ public class ControlView extends CardView {
         return isLollipop() && this.isRaised;
     }
 
-    private void animateToPosition(@NonNull MotionEvent motionEvent, int position) {
+    private void animateToPosition(@Nullable MotionEvent motionEvent, int position) {
         this.backgroundView.setCurrentPosition(this.foregroundView.getCurrentPosition());
         this.foregroundView.setCurrentPosition(position);
 
-        if (isLollipop())
+        if (isLollipop() && motionEvent != null)
             circularRevealForegroundView((int) motionEvent.getX(), (int) motionEvent.getY());
         else
             fadeInForegroundView();
@@ -287,6 +287,17 @@ public class ControlView extends CardView {
         this.accentColour = getResources().getColor(accentColour);
         this.foregroundView.setAccentColour(this.accentColour);
         this.backgroundView.setAccentColour(this.accentColour);
+    }
+
+    public void setSelectedControlOptionPosition(int selectedControlOptionPosition, boolean animate) {
+        this.selectedControlOptionPosition = selectedControlOptionPosition;
+
+        if (animate)
+            animateToPosition(null, selectedControlOptionPosition);
+        else
+            this.foregroundView.setCurrentPosition(selectedControlOptionPosition);
+
+        updateTextViewColours();
     }
 
     public interface OnControlOptionSelectedListener {
