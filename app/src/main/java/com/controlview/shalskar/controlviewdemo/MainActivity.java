@@ -8,6 +8,7 @@ import android.widget.ImageView;
 import com.controlview.shalskar.controlview.ControlView;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity {
@@ -33,10 +34,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initialiseControlView() {
-        this.controlView = (ControlView) findViewById(R.id.controlview1);
+        this.controlView = (ControlView) findViewById(R.id.controlview);
         this.controlView.setBaseColour(android.R.color.white);
         this.controlView.setAccentColour(R.color.colorAccent);
-        this.controlView.setControlOptions(Arrays.asList(ITEMS));
+        this.controlView.setControlOptions(new ArrayList<>(Arrays.asList(ITEMS)));
         this.controlView.setOnControlOptionSelectedListener(new ControlView.OnControlOptionSelectedListener() {
             @Override
             public void onControlOptionSelected(int position, @NonNull String controlOption) {

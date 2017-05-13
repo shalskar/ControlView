@@ -3,6 +3,8 @@ package com.controlview.shalskar.controlview;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Build;
+import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.ColorRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -20,6 +22,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ControlView extends CardView {
+
+    /**
+     * State constants
+     **/
+
+    private static final String EXTRA_SUPER_STATE = "super_state";
+    private static final String EXTRA_CONTROL_OPTIONS = "control_options";
+    private static final String EXTRA_CURRENT_POSITION = "current_position";
+
+    /**
+     * View constants
+     */
 
     private static final float BASE_ELEVATION = 2;
     private static final float RAISED_ELEVATION = 8;
@@ -59,7 +73,7 @@ public class ControlView extends CardView {
      **/
 
     @Nullable
-    private List<String> controlOptions;
+    private ArrayList<String> controlOptions;
 
     private int selectedControlOptionPosition;
 
@@ -133,7 +147,7 @@ public class ControlView extends CardView {
         this.controlOptionTextViewPadding = (int) getResources().getDimension(R.dimen.control_option_textview_padding);
     }
 
-    public void setControlOptions(@NonNull List<String> controlOptions) {
+    public void setControlOptions(@NonNull ArrayList<String> controlOptions) {
         this.controlOptions = controlOptions;
         addControlOptionsViews();
         this.foregroundView.setCurrentPosition(0);
@@ -181,6 +195,8 @@ public class ControlView extends CardView {
 
     @Override
     public boolean dispatchTouchEvent(@NonNull MotionEvent event) {
+        if (!isEnabled()) return super.dispatchTouchEvent(event);
+
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 if (shouldAnimateElevation())
@@ -191,19 +207,27 @@ public class ControlView extends CardView {
                     animateElevationDown();
                 break;
             case MotionEvent.ACTION_UP:
-                this.selectedControlOptionPosition = findClickPosition(event);
-                animateToPosition(event, this.selectedControlOptionPosition);
-                updateTextViewColours();
-
-                if (this.onControlOptionSelectedListener != null)
-                    this.onControlOptionSelectedListener.onControlOptionSelected(this.selectedControlOptionPosition,
-                            this.controlOptions.get(selectedControlOptionPosition));
-
-                if (shouldAnimateElevation())
-                    animateElevationDown();
+                onClick(event);
                 break;
         }
         return super.dispatchTouchEvent(event);
+    }
+
+    private void onClick(@NonNull MotionEvent motionEvent) {
+        this.selectedControlOptionPosition = findClickPosition(motionEvent);
+        animateToPosition(motionEvent, this.selectedControlOptionPosition);
+        updateTextViewColours();
+
+        if (this.onControlOptionSelectedListener != null)
+            sendClickEvent();
+
+        if (shouldAnimateElevation())
+            animateElevationDown();
+    }
+
+    private void sendClickEvent() {
+        this.onControlOptionSelectedListener.onControlOptionSelected(this.selectedControlOptionPosition,
+                this.controlOptions.get(this.selectedControlOptionPosition));
     }
 
     private boolean shouldAnimateElevation() {
@@ -218,7 +242,6 @@ public class ControlView extends CardView {
             circularRevealForegroundView((int) motionEvent.getX(), (int) motionEvent.getY());
         else
             fadeInForegroundView();
-
 
         this.backgroundView.setAlpha(1);
         this.backgroundView.animate().alpha(0).start();
@@ -242,10 +265,6 @@ public class ControlView extends CardView {
             boolean isSelected = i == this.selectedControlOptionPosition;
             controlOptionTextView.setTextColor(isSelected ? this.selectedTextColour : this.unselectedTextColour);
         }
-    }
-
-    private boolean isLollipop() {
-        return Build.VERSION.SDK_INT >= 21;
     }
 
     private void animateElevationUp() {
@@ -273,6 +292,10 @@ public class ControlView extends CardView {
         return -1;
     }
 
+    private boolean isLollipop() {
+        return Build.VERSION.SDK_INT >= 21;
+    }
+
     public void setOnControlOptionSelectedListener(@Nullable final OnControlOptionSelectedListener onControlOptionSelectedListener) {
         this.onControlOptionSelectedListener = onControlOptionSelectedListener;
     }
@@ -298,6 +321,28 @@ public class ControlView extends CardView {
             this.foregroundView.setCurrentPosition(selectedControlOptionPosition);
 
         updateTextViewColours();
+    }
+
+    @Override
+    protected Parcelable onSaveInstanceState() {
+        Parcelable superState = super.onSaveInstanceState();
+
+        Bundle customStateBundle = new Bundle();
+        customStateBundle.putParcelable(EXTRA_SUPER_STATE, superState);
+        customStateBundle.putStringArrayList(EXTRA_CONTROL_OPTIONS, this.controlOptions);
+        customStateBundle.putInt(EXTRA_CURRENT_POSITION, this.selectedControlOptionPosition);
+
+        return customStateBundle;
+    }
+
+    @Override
+    protected void onRestoreInstanceState(@NonNull Parcelable state) {
+        Bundle customStateBundle = (Bundle) state;
+
+        this.controlOptions = customStateBundle.getStringArrayList(EXTRA_CONTROL_OPTIONS);
+        setSelectedControlOptionPosition(customStateBundle.getInt(EXTRA_CURRENT_POSITION), false);
+
+        super.onRestoreInstanceState(customStateBundle.getParcelable(EXTRA_SUPER_STATE));
     }
 
     public interface OnControlOptionSelectedListener {
