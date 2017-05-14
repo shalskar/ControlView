@@ -1,5 +1,6 @@
 package com.controlview.shalskar.controlview;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Build;
@@ -247,6 +248,7 @@ public class ControlView extends CardView {
         this.backgroundView.animate().alpha(0).start();
     }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void circularRevealForegroundView(int x, int y) {
         int circularRevealEndRadius = Math.max(getWidth(), getHeight());
         ViewAnimationUtils.createCircularReveal(this.foregroundView, x, y, 0, circularRevealEndRadius).start();
@@ -267,6 +269,7 @@ public class ControlView extends CardView {
         }
     }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void animateElevationUp() {
         animate()
                 .z(RAISED_ELEVATION)
@@ -274,6 +277,7 @@ public class ControlView extends CardView {
                 .start();
     }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void animateElevationDown() {
         animate()
                 .z(BASE_ELEVATION)

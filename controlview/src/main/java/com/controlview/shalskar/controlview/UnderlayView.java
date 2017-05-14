@@ -8,9 +8,6 @@ import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.view.View;
 
-/**
- * Created by RachelTeTau on 5/05/17.
- */
 public class UnderlayView extends View {
 
     private int currentPosition = 0;
